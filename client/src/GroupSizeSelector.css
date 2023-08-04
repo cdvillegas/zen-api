@@ -1,0 +1,23 @@
+.group-size-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.group-size-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 2px solid #eee;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  background-color: #dadada; /* Slightly darker background for unselected */
+}
+
+.group-size-option.selected,
+.group-size-option:hover {
+  background-color: #fff; /* White background for selected and hovered */
+
+}

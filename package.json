@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "client": "cd client && npm start",
+    "server": "cd server && node index.js",
+    "dev": "npm run client & npm run server"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}
