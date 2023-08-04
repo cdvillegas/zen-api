@@ -1,12 +1,11 @@
 // App.js
 import React from 'react';
-import DestinationInput from './DestinationInput';
+import LandingPage from './LandingPage';
 
 function App() {
   return (
     <div className="App">
-      <h1>Travel Planner</h1>
-      <DestinationInput />
+      <LandingPage />
     </div>
   );
 }

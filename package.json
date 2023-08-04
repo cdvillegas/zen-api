@@ -5,6 +5,7 @@
     "dev": "npm run client & npm run server"
   },
   "dependencies": {
+    "@openapitools/openapi-generator-cli": "^2.7.0",
     "dotenv": "^16.3.1"
   }
 }

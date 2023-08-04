@@ -10,8 +10,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 const app = express();
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
 const port = process.env.PORT || 3001;
 
@@ -19,33 +19,36 @@ app.post('/generate', async (req, res) => {
   try {
     console.log('Received request:', req.body);
 
-    // Read the template
-    const template = fs.readFileSync('promptTemplate.txt', 'utf8');
+    // Read the current Open API spec
+    const openApiSpec = req.body.openApiSpec;
 
-    // Extract user input and convert to JSON string
-    const userInput = JSON.stringify(req.body);
+    // Extract user request
+    const userRequest = req.body.userRequest;
 
-    // Replace the placeholder with the actual user input
-    const prompt = template.replace('USER_INPUT_PLACEHOLDER', userInput);
+    // Read the prompt template
+    let promptTemplate = fs.readFileSync('promptTemplate.txt', 'utf8');
+
+    // Replace the placeholders with the actual values
+    promptTemplate = promptTemplate.replace('OPEN_API_SPEC_HERE', openApiSpec);
+    promptTemplate = promptTemplate.replace('USER_REQUEST', userRequest);
 
     const chat_completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: promptTemplate }],
     });
-    
+
     // Extract the response
-    const itinerary = JSON.parse(chat_completion.data.choices[0].message.content);
-    console.log(chat_completion.data.choices[0].message.content);
+    const apiSpecResponse = chat_completion.data.choices[0].message.content;
+    console.log(apiSpecResponse);
 
     // Respond to the client
-    res.json(itinerary);
+    res.json({ apiSpec: apiSpecResponse });
   } catch (error) {
     console.error(error);
-    res.status(500).send('An error occurred while generating the itinerary.');
+    res.status(500).send('An error occurred while processing the request.');
   }
 });
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
-
