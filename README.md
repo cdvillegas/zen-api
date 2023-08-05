@@ -1,4 +1,4 @@
-# API Cloud
+# Zen API
 A React web application that allows users to create and deploy APIs within seconds.
 
 ## Prerequisites
