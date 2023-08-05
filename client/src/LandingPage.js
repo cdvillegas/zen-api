@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
 import './LandingPage.css';
+import YAML from 'yaml'; // you will need to install this package
 
 function LandingPage() {
   const [openApiSpec, setOpenApiSpec] = useState(''); // Store the current Open API spec
   const [userRequest, setUserRequest] = useState('');
   const [loading, setLoading] = useState(false);
-  const [codeType, setCodeType] = useState(''); // client or server
-  const [language, setLanguage] = useState(''); // Selected language or framework
-  const [clientDropdownOpen, setClientDropdownOpen] = useState(false);
-  const [serverDropdownOpen, setServerDropdownOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // new state for editing
+  const [tempSpec, setTempSpec] = useState(''); // Temporary spec for editing
+
+  useEffect(() => {
+    if (isEditing) {
+      setTempSpec(openApiSpec);
+    }
+  }, [isEditing, openApiSpec]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -20,7 +25,7 @@ function LandingPage() {
   const handleQuerySubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     try {
       const response = await fetch('http://localhost:3001/generate', {
         method: 'POST',
@@ -35,8 +40,49 @@ function LandingPage() {
     } catch (error) {
       console.error('There was an error submitting the query:', error);
     }
-
+  
     setLoading(false);
+  };
+  
+
+  const handleOpenSwaggerEditor = () => {
+    window.open(`https://editor.swagger.io/?url=${encodeURIComponent(openApiSpec)}`, '_blank');
+  };
+
+  const editSpec = () => {
+    setIsEditing(true);
+  };
+
+  const saveSpec = () => {
+    setOpenApiSpec(tempSpec);
+    setIsEditing(false);
+  };
+
+  const cancelEdit = () => {
+    setTempSpec('');
+    setIsEditing(false);
+  };
+
+  const handleTempSpecChange = (e) => {
+    setTempSpec(e.target.value);
+  };
+
+  const handleDownload = (format) => {
+    let text = openApiSpec;
+    let filename = 'api-spec';
+    let mimetype = 'application/json';
+    if (format === 'yaml') {
+      text = YAML.stringify(JSON.parse(openApiSpec));
+      mimetype = 'application/x-yaml';
+      filename += '.yaml';
+    } else {
+      filename += '.json';
+    }
+    const blob = new Blob([text], { type: mimetype });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
   };
 
   return (
@@ -56,28 +102,37 @@ function LandingPage() {
       </div>
 
       <div className="api-spec">
-        <div class="header">
+        <div className="header">
           <h2>OpenAPI Specification:</h2>
-          <div className="dropdowns">
-          <div className={`dropdown ${clientDropdownOpen ? 'open' : ''}`}>
-            <button onClick={() => setClientDropdownOpen(!clientDropdownOpen)}>Generate Client</button>
-            <div className="dropdown-content">
-              <a href="#" onClick={() => { setCodeType('client'); setLanguage('javascript'); }}>JavaScript</a>
-              <a href="#" onClick={() => { setCodeType('client'); setLanguage('java'); }}>Java</a>
-              <a href="#" onClick={() => { setCodeType('client'); setLanguage('python'); }}>Python</a>
-            </div>
-          </div>
-
-          <div className={`dropdown ${serverDropdownOpen ? 'open' : ''}`}>
-            <button onClick={() => setServerDropdownOpen(!serverDropdownOpen)}>Generate Server</button>
-            <div className="dropdown-content">
-              <a href="#" onClick={() => { setCodeType('server'); setLanguage('spring'); }}>Spring</a>
-              <a href="#" onClick={() => { setCodeType('server'); setLanguage('nodejs-express-server'); }}>Node.js Express</a>
-            </div>
+          <div className="button-group">
+            {isEditing ? (
+              <>
+                <button onClick={saveSpec}>Save</button>
+                <button onClick={cancelEdit}>Cancel</button>
+              </>
+            ) : (
+              <>
+                <button onClick={editSpec}>Edit Spec</button>
+                <div className="dropdown">
+                  <button className="dropbtn">Download</button>
+                  <div className="dropdown-content">
+                    <a onClick={() => handleDownload('json')}>JSON</a>
+                    <a onClick={() => handleDownload('yaml')}>YAML</a>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
-      </div>
-       <SwaggerUI spec={JSON.parse(openApiSpec ? openApiSpec : "{}")} />
+        {isEditing ? (
+          <textarea
+            value={tempSpec}
+            onChange={handleTempSpecChange}
+            className="spec-edit"
+          />
+        ) : (
+          <SwaggerUI spec={JSON.parse(openApiSpec ? openApiSpec : "{}")} />
+        )}
       </div>
     </div>
   );
