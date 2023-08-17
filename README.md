@@ -9,11 +9,11 @@ Before running the app, make sure you have Node.js and npm installed on your sys
 
 1. Clone the repository:
 ```
-git clone https://github.com/cdvillegas/api-cloud.git
+git clone https://github.com/cdvillegas/zen-api.git
 ```
 2. Install dependencies:
 ```
-cd api-cloud
+cd zen-api
 npm install
 ```
 
