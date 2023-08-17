@@ -23,9 +23,9 @@ npm install
 
 To start the server, use the following command:
 ```
-npm run client
+npm run server
 ```
-The server will run on port 5000.
+The server will run on port 3001.
 
 ### Running the Client
 
